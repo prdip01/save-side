@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Message Encoder/Decoder</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles for the glassmorphism effect and iOS feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden; /* Prevent scrollbars from the gradient */
+        }
+
+        /* The main container with the frosted glass effect */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        /* Styling for textareas and result divs */
+        .input-glass {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+        .input-glass:focus {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: rgba(100, 220, 255, 0.5);
+        }
+
+        /* Custom scrollbar for a better look */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Button styles */
+        .btn-primary {
+            background: linear-gradient(45deg, #2196F3, #4CAF50);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+             background: linear-gradient(45deg, #f44336, #ff9800);
+        }
+        
+    </style>
+</head>
+<body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md mx-auto glass-container rounded-2xl p-6 md:p-8 space-y-6">
+        
+        <!-- Initial Choice Screen -->
+        <div id="choiceScreen" class="text-center space-y-4">
+            <h1 class="text-3xl font-bold text-white"> Save Side @02+04</h1>
+            <p class="text-gray-300">What would you like to do?</p>
+            <div class="flex flex-col space-y-4 pt-4">
+                <button id="showEncodeBtn" class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg">
+                    Encode a Message
+                </button>
+                <button id="showDecodeBtn" class="w-full btn-secondary text-white font-bold py-3 px-4 rounded-lg shadow-lg">
+                    Decode a Message
+                </button>
+            </div>
+        </div>
+
+        <!-- Encoder/Decoder Container -->
+        <div id="mainApp" class="hidden">
+            <button id="backBtn" class="mb-4 text-cyan-300 hover:text-cyan-100 transition">&larr; Back to menu</button>
+            
+            <!-- Encoder Section -->
+            <div id="encoderSection" class="space-y-4">
+                <h2 class="text-2xl font-semibold text-white text-center">Encode Message</h2>
+                <textarea id="encodeInput" rows="4" class="w-full p-3 input-glass rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-white placeholder-gray-400" placeholder="Type your message here..."></textarea>
+                <button id="encodeBtn" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg">
+                    Encode
+                </button>
+                <div class="space-y-2">
+                    <label class="font-medium text-gray-300">Encoded Result:</label>
+                    <div id="encodeOutput" class="w-full p-3 min-h-[100px] input-glass rounded-lg text-gray-200 whitespace-pre-wrap break-words"></div>
+                    <div id="share-container" class="hidden flex items-center justify-center gap-2 mt-3">
+                        <button id="copyBtn" title="Copy" class="flex items-center justify-center h-10 w-10 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-full transition duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                        </button>
+                        <a id="whatsappShareBtn" href="#" target="_blank" title="Share on WhatsApp" class="flex items-center justify-center h-10 w-10 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full transition duration-200">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+                        </a>
+                         <button id="instagramShareBtn" title="Share on Instagram" class="flex items-center justify-center h-10 w-10 bg-gradient-to-br from-purple-600 via-pink-500 to-yellow-400 hover:opacity-90 text-white font-semibold rounded-full transition duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.231s.008-2.389.046-3.232c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.884a1.15 1.15 0 1 0 0 2.299 1.15 1.15 0 0 0 0-2.3zM8 3.882a4.108 4.108 0 1 0 0 8.217 4.108 4.108 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/></svg>
+                        </button>
+                    </div>
+                     <p id="copy-feedback" class="text-center text-sm text-green-400 h-4"></p>
+                </div>
+            </div>
+
+            <!-- Decoder Section -->
+            <div id="decoderSection" class="hidden space-y-4">
+                 <h2 class="text-2xl font-semibold text-white text-center">Decode Message</h2>
+                <textarea id="decodeInput" rows="4" class="w-full p-3 input-glass rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-white placeholder-gray-400" placeholder="Paste your secret code here..."></textarea>
+                <button id="decodeBtn" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg">
+                    Decode
+                </button>
+                <div class="space-y-2">
+                    <label class="font-medium text-gray-300">Decoded Message:</label>
+                    <div id="decodeOutput" class="w-full p-3 min-h-[100px] input-glass rounded-lg text-gray-200 whitespace-pre-wrap break-words"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const choiceScreen = document.getElementById('choiceScreen');
+            const mainApp = document.getElementById('mainApp');
+            const showEncodeBtn = document.getElementById('showEncodeBtn');
+            const showDecodeBtn = document.getElementById('showDecodeBtn');
+            const backBtn = document.getElementById('backBtn');
+
+            const encoderSection = document.getElementById('encoderSection');
+            const encodeInput = document.getElementById('encodeInput');
+            const encodeBtn = document.getElementById('encodeBtn');
+            const encodeOutput = document.getElementById('encodeOutput');
+            
+            const decoderSection = document.getElementById('decoderSection');
+            const decodeInput = document.getElementById('decodeInput');
+            const decodeBtn = document.getElementById('decodeBtn');
+            const decodeOutput = document.getElementById('decodeOutput');
+
+            const shareContainer = document.getElementById('share-container');
+            const copyBtn = document.getElementById('copyBtn');
+            const whatsappShareBtn = document.getElementById('whatsappShareBtn');
+            const instagramShareBtn = document.getElementById('instagramShareBtn');
+            const copyFeedback = document.getElementById('copy-feedback');
+
+
+            // --- UI Navigation Logic ---
+            const showScreen = (screen) => {
+                choiceScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                encoderSection.classList.add('hidden');
+                decoderSection.classList.add('hidden');
+
+                if (screen === 'encode') {
+                    encoderSection.classList.remove('hidden');
+                } else if (screen === 'decode') {
+                    decoderSection.classList.remove('hidden');
+                }
+            };
+            
+            const showChoiceScreen = () => {
+                mainApp.classList.add('hidden');
+                choiceScreen.classList.remove('hidden');
+                // Reset fields
+                encodeInput.value = '';
+                encodeOutput.textContent = '';
+                decodeInput.value = '';
+                decodeOutput.textContent = '';
+                shareContainer.classList.add('hidden');
+            };
+
+            showEncodeBtn.addEventListener('click', () => showScreen('encode'));
+            showDecodeBtn.addEventListener('click', () => showScreen('decode'));
+            backBtn.addEventListener('click', showChoiceScreen);
+
+
+            // --- Cipher Logic ---
+            const cipherMap = {
+                'a': '!w1', 'b': '#e2', 'c': '$r3', 'd': '%t4', 'e': '^y5', 'f': '&u6', 'g': '*i7', 'h': '(o8', 'i': ')p9', 'j': '_a0', 'k': '+s1', 'l': '-d2', 'm': '=f3',
+                'n': '`g4', 'o': '~h5', 'p': '[j6', 'q': ']k7', 'r': '{l8', 's': '}z9', 't': '|x0', 'u': '\\c1', 'v': ':v2', 'w': ';b3', 'x': '"n4', 'y': "'m5", 'z': '<q6',
+                'A': '>W7', 'B': ',E8', 'C': '.R9', 'D': '/T0', 'E': '?Y1', 'F': '<U2', 'G': '>I3', 'H': ',O4', 'I': '.P5', 'J': '/A6', 'K': '?S7', 'L': '<D8', 'M': '>F9',
+                'N': ',G0', 'O': '.H1', 'P': '/J2', 'Q': '?K3', 'R': '<L4', 'S': '>Z5', 'T': ',X6', 'U': '.C7', 'V': '?V8', 'W': '<B9', 'X': '>N0', 'Y': ',M1', 'Z': '.Q2',
+                '0': 'qA3', '1': 'wS4', '2': 'eD5', '3': 'rF6', '4': 'tG7', '5': 'yH8', '6': 'uJ9', '7': 'iK0', '8': 'oL1', '9': 'pL2',
+                ' ': 'zZ3', '.': 'xX4', ',': 'cC5', '!': 'vV6', '?': 'bB7', "'": 'nN8', '"': 'mM9', '\n': 'rR1'
+            };
+            const reverseCipherMap = Object.fromEntries(Object.entries(cipherMap).map(([key, value]) => [value, key]));
+
+            function encodeMessage(message) {
+                let encoded = '';
+                for (const char of message) {
+                    encoded += (cipherMap[char] || char) + ' ';
+                }
+                return encoded.trim();
+            }
+
+            function decodeMessage(encodedMessage) {
+                const codes = encodedMessage.split(' ');
+                let decoded = '';
+                for (const code of codes) {
+                    decoded += reverseCipherMap[code] || code;
+                }
+                return decoded;
+            }
+
+            // --- Event Listeners ---
+            encodeBtn.addEventListener('click', () => {
+                const message = encodeInput.value;
+                if (!message) {
+                    encodeOutput.textContent = 'Please enter a message to encode.';
+                    shareContainer.classList.add('hidden');
+                    return;
+                }
+                const encoded = encodeMessage(message);
+                encodeOutput.textContent = encoded;
+                shareContainer.classList.remove('hidden');
+                
+                const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(encoded)}`;
+                whatsappShareBtn.href = whatsappUrl;
+            });
+
+            decodeBtn.addEventListener('click', () => {
+                const encodedMessage = decodeInput.value;
+                if (!encodedMessage) {
+                    decodeOutput.textContent = 'Please enter a code to decode.';
+                    return;
+                }
+                const decoded = decodeMessage(encodedMessage);
+                decodeOutput.textContent = decoded;
+            });
+            
+            const showCopyFeedback = (message) => {
+                copyFeedback.textContent = message;
+                setTimeout(() => {
+                    copyFeedback.textContent = '';
+                }, 2500);
+            };
+
+            const copyToClipboard = () => {
+                 const textToCopy = encodeOutput.textContent;
+                if (!textToCopy) return;
+
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = textToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopyFeedback('Copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    showCopyFeedback('Failed to copy.');
+                }
+                document.body.removeChild(tempTextArea);
+            };
+
+            copyBtn.addEventListener('click', copyToClipboard);
+            
+            instagramShareBtn.addEventListener('click', () => {
+                copyToClipboard();
+                showCopyFeedback('Copied! Now paste it in Instagram.');
+            });
+        });
+    </script>
+</body>
+</html>
